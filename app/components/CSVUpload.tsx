@@ -5,8 +5,38 @@ import { useState } from 'react';
 export default function CSVUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState(""); // To show "Uploading..." or "Success!"
+  const [isDragging, setIsDragging] = useState(false);
 
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      // Basic check to ensure it's a CSV
+      if (droppedFile.name.endsWith('.csv')) {
+        setFile(droppedFile);
+        setStatus("");
+      } else {
+        setStatus("Please drop a CSV file.");
+      }
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Files is an array, we just want the first one selected
     setFile(e.target.files?.[0] ?? null);
 };
@@ -53,11 +83,18 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     </div>
 
     {/* The Hidden Input & Styled Label */}
-    <label className="group relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-950 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition-all cursor-pointer overflow-hidden">
+    <label 
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`group relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed rounded-2xl transition-all cursor-pointer overflow-hidden
+        ${isDragging ? 'border-primary bg-primary/10' : 'border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950'}
+        hover:border-primary dark:hover:border-primary hover:bg-primary/5`}
+    >
       <input 
         type="file" 
         accept=".csv"
-        className="hidden" // Hides the ugly default input
+        className="hidden" 
         onChange={handleFileChange}
       />
       
