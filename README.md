@@ -1,4 +1,4 @@
-# Insert Project Title Here
+Money Moves
 
 > An all-in-one platform for budgeting and managing your expenses with dynamic AI integration and a friendly UI.
 
@@ -8,7 +8,7 @@
 Having many sources of payment today is common practice. This makes having a clear portrait of your budget much more difficult as your expenditures are separated across different platforms. [Insert project title here] is a website that addresses this problem.
 
 ### Built With
-* Next.js, PostgreSQL, [add other].
+* Next.js, PostgreSQL, etc.
 
 
 ---
@@ -22,6 +22,7 @@ You must enter your own Gemini API key in the .env file.
 1. **Clone the repo**
 ```bash
 git clone [https://github.com/chanlan1105/money-moves.git]
+```
 
 2. **Install dependencies**
 ```bash
