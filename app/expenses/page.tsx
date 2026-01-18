@@ -83,11 +83,19 @@ export default function Expenses() {
         };
     })
     .sort((a, b) => {
-        // Calculate percentages (actual / budget)
-        const pctA = a.actual / a.budget;
-        const pctB = b.actual / b.budget;
+        const getPercentage = (item: any) => {
+            if (item.budget === 0) {
+                // If budget is 0 and we've spent money, treat it as 1000% (High priority)
+                // If budget is 0 and spent is 0, treat it as 0% (Low priority)
+                return item.actual > 0 ? 10 : 0; 
+            }
+            return item.actual / item.budget;
+        };
+
+        const pctA = getPercentage(a);
+        const pctB = getPercentage(b);
         
-        // Sort descending: highest percentage first
+        // Sort descending: highest percentage (most over budget) first
         return pctB - pctA;
     });
 
