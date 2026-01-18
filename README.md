@@ -8,15 +8,21 @@
 Having many sources of payment today is common practice. This makes having a clear portrait of your budget much more difficult as your expenditures are separated across different platforms. [Insert project title here] is a website that addresses this problem.
 
 ### Built With
-* Next.js, PostgreSQL, etc.
+* Next.js
+* PostgreSQL
+* Tailwind CSS
 
 
 ---
 
 ## Getting Started
 
-### Prerequisites
-You must enter your own Gemini API key in the .env file.
+### Environment configuration
+At the root of the project, create a `.env` file with:
+```
+POSTGRES_URL="your_postgres_connection_string"
+GEMINI_API_KEY="your_api_key"
+```
 
 ### Running the website
 1. **Clone the repo**
@@ -44,7 +50,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the r
 
 ## Usage
 
-1. Upload you bank account or credit card statements in .cvs format in the Upload tab.
+1. Upload you bank account or credit card statements in `.csv` format in the Upload tab.
 2. Define monthly budget limits on a per-category basis for the month or the year in the Budget tab.
 3. Visualize your expenditures in the Expenses tab.
 
