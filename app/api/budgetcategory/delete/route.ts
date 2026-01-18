@@ -1,4 +1,5 @@
-import getCategories from "@/app/lib/db/categories";
+import categorise from "@/app/lib/db/categorise";
+import getCategories from "@/app/lib/db/getCategories";
 import { gemini } from "@/app/lib/gemini";
 import { sql } from "@/app/lib/sql";
 import { NextRequest } from "next/server";
@@ -50,32 +51,14 @@ export async function DELETE(req: NextRequest) {
             SELECT id, detail
             FROM transactions
             WHERE "user"=${user} AND category IS NULL
-        `;
+        ` as { id: number, detail: string }[];
 
         if (orphans.length) {
             // Get list of valid categories
             const categories = (await getCategories(user)).map(c => c.category);
-            const reclassifications: { id: number, category: string }[] = [];
 
-            let i = 0;
-            while (i < orphans.length) {
-                // Slice 50 orphans to parse at once
-                const orphansToParse = orphans.slice(i, i+50);
-
-                const prompt = `
-                    Assign each transaction to one of these categories: ${categories.join(", ")}. If a transaction does not adequately fit into a category, assign it "Other".
-                    Transactions: ${JSON.stringify(orphansToParse)}
-                    Return ONLY a JSON array: [{"id": 1, "category": "Food"}]
-                `;
-
-                // Prompt model to reclassify transactions
-                const response = await gemini(prompt);
-                if (!response) throw new Error();
-
-                reclassifications.push(...JSON.parse(response));
-
-                i += 50;
-            }
+            // Reclassify orphan entries
+            const reclassifications = await categorise(categories, orphans);
             
             // Update database
             await sql.begin(async (tx: any) => {

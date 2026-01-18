@@ -1,4 +1,4 @@
-import getCategories from "@/app/lib/db/categories";
+import getCategories from "@/app/lib/db/getCategories";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
