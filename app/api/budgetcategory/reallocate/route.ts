@@ -9,12 +9,12 @@ export async function POST(req: NextRequest) {
     try {
         // Fetch corresponding db entries
         const transactions = await sql`
-            SELECT (id, detail)
+            SELECT id, date, category, detail, amount 
             FROM transactions
             WHERE "user"=${user}
                 AND date >= ${month}::date 
                 AND date < (${month}::date + interval '1 month')
-        ` as { id: number, detail: string }[];
+        ` as any[];
 
         // Fetch valid categories
         const categories = (await getCategories(user)).map(c => c.category);
@@ -37,7 +37,13 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        return new Response("ok", { status: 200 });
+        return Response.json(transactions.map(t => {
+            const category = reclassifications.find(rc => rc.id == t.id)?.category;
+            return {
+                ...t,
+                category
+            };
+        }), { status: 200 });
     }
     catch (err) {
         console.error(err);
