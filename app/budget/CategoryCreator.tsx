@@ -73,13 +73,13 @@ export default function CategoryCreator({ editScope, monthString }: { editScope:
         } finally {
             setIsLoading(false);
         }
-    }, [editScope]);
+    }, [editScope, monthString]);
 
 
     // --- NEW: LIFECYCLE HOOK ---
     useEffect(() => {
         fetchCategories();
-    }, [editScope]);
+    }, [editScope, monthString]);
 
     const handleAddCategory = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -143,7 +143,7 @@ export default function CategoryCreator({ editScope, monthString }: { editScope:
     const handleUpdate = async (oldCategoryName: string) => {
         const amount = parseFloat(tempBudget);
         setError("");
-        // 1. Validate Name (unless it's 'Other')
+
         if (!tempName.trim()) {
             setError("Category name cannot be empty.");
             return;
@@ -154,86 +154,84 @@ export default function CategoryCreator({ editScope, monthString }: { editScope:
             return;
         }
 
-
-
-        // 2. Validate Budget
         if (isNaN(amount) || amount < 0) {
             setError("Budget cannot be negative.");
             return;
         }
 
-        // THE SAFEGUARD: 
-        // If we are updating 'Other', the newCategory name MUST remain 'Other'.
-        // Otherwise, use the tempName the user typed.
         const finalName = oldCategoryName.toLowerCase() === 'other'
             ? oldCategoryName
             : tempName.trim();
 
         setIsLoading(true);
+
+        // 🧠 Determine which "door" to knock on based on our scope
+        const apiUrl = editScope === 'monthly' 
+            ? '/api/budgetcategory/update_month' 
+            : '/api/budgetcategory/update';
+
+        const payload = editScope === 'monthly'
+            ? { user: "hackathon", category: oldCategoryName, newBudget: amount, month: `${monthString}-01` }
+            : { user: "hackathon", oldCategory: oldCategoryName, newCategory: finalName, newBudget: amount };
+
         try {
-            const response = await fetch('/api/budgetcategory/update', {
+            const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user: "hackathon",
-                    oldCategory: oldCategoryName,
-                    newCategory: finalName, // We use the protected name here!
-                    newBudget: parseFloat(tempBudget)
-                }),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {
-                // Update local state with the same safe name
-                setCategories(prev => prev.map(cat =>
-                    cat.name === oldCategoryName
-                        ? { name: finalName, budget: parseFloat(tempBudget) }
-                        : cat
-                ));
+                // Refresh data from server to ensure UI matches DB exactly
+                await fetchCategories();
                 setEditingName(null);
             } else {
-                setError("Failed to update category.");
+                setError("Failed to update.");
             }
         } catch (err) {
-            setError("Error connecting to update service.");
+            setError("Connection error.");
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleDelete = async (categoryToDelete: string) => {
-        // 1. Hard Safeguard
         if (categoryToDelete.toLowerCase() === 'other') {
             setError("The 'Other' category is required and cannot be deleted.");
             return;
         }
 
-        // 2. Confirmation Dialog (Browser native is fastest for hackathons)
-        if (!window.confirm(`Are you sure you want to delete "${categoryToDelete}"? Transactions will be moved to relevant categories.`)) {
-            return;
-        }
+        // Logic Check: Are we deleting the whole category or just a monthly override?
+        const isMonthly = editScope === 'monthly';
+        const confirmMsg = isMonthly
+            ? `Reset "${categoryToDelete}" to global template value for this month?`
+            : `Permanently delete "${categoryToDelete}"? This will move all existing transactions to other categories.`;
+
+        if (!window.confirm(confirmMsg)) return;
 
         setIsLoading(true);
         try {
-            const response = await fetch('/api/budgetcategory/delete', {
+            const apiUrl = isMonthly 
+                ? '/api/budgetcategory/delete_override' 
+                : '/api/budgetcategory/delete';
+
+            const payload = isMonthly
+                ? { user: "hackathon", category: categoryToDelete, month: `${monthString}-01` }
+                : { user: "hackathon", category: categoryToDelete };
+
+            const response = await fetch(apiUrl, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user: "hackathon",
-                    category: categoryToDelete
-                }),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {
-                // 3. Update Local State: Remove the deleted item from the list
-                setCategories(prev => prev.filter(cat => cat.name !== categoryToDelete));
-
-                // OPTIONAL: Re-fetch all categories to see the new totals/allocations
-                // await fetchCategories(); 
+                await fetchCategories();
             } else {
-                setError("Failed to delete category.");
+                setError("Failed to delete.");
             }
         } catch (err) {
-            setError("Server error during deletion.");
+            setError("Server error.");
         } finally {
             setIsLoading(false);
         }
@@ -332,7 +330,7 @@ export default function CategoryCreator({ editScope, monthString }: { editScope:
                             month: `${monthString}-01`
                         };
 
-                        const response = await fetch("/api/budget-overrides", {
+                        const response = await fetch("/api/budgetcategory/update_month", {
                             method: "PUT",
                             headers: {
                                 "Content-Type": "application/json",
@@ -343,6 +341,9 @@ export default function CategoryCreator({ editScope, monthString }: { editScope:
                         if (!response.ok) {
                             // This will be caught by the try/catch in OverrideCreator
                             throw new Error("Failed to save budget override");
+                        }
+                        else{
+                            fetchCategories();
                         }
                     }}
                     isLoading={isLoading}
