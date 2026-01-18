@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, Activity } from 'react';
+import { useState, useEffect, useCallback, Activity, useTransition } from 'react';
 import OverrideCreator from './OverrideCreator';
+import CategoryRow from './CategoryRow';
 
 interface Category {
     name: string;
@@ -369,96 +370,21 @@ export default function CategoryCreator({ editScope, monthString }: { editScope:
                             </div>
                         ) : (
                             /* 3. Real Data: Show the list */
-                            categoriesForList.map((cat, index) => (
-                                <div key={index} className="p-4 bg-base-100 rounded-lg group hover:bg-base-300 transition-all mb-3">
-                                    {/* CHECK: Are we currently editing this specific category? */}
-                                    {editingName === cat.name ? (
-                                        /* --- EDIT MODE --- */
-                                        <div className="flex flex-col md:flex-row gap-3 items-center">
-
-                                            {/* NAME INPUT: Disabled if it's 'Other' */}
-                                            <div className="flex-1 w-full">
-                                                <input
-                                                    className={`input input-bordered input-sm w-full ${cat.name.toLowerCase() === 'other' || editScope == 'monthly' ? 'bg-base-300 cursor-not-allowed opacity-70' : ''}`}
-                                                    value={tempName}
-                                                    onChange={(e) => {
-                                                        setTempName(e.target.value);
-                                                        if (error) setError(""); //  Clear error during editing
-                                                    }}
-                                                    disabled={cat.name.toLowerCase() === 'other' || editScope == 'monthly'} //  The Lock
-                                                    title={cat.name.toLowerCase() === 'other' ? "System category names cannot be changed" : ""}
-                                                />
-                                                {cat.name.toLowerCase() === 'other' && (
-                                                    <span className="text-[10px] text-info ml-1 italic">Name is system-reserved</span>
-                                                )}
-                                            </div>
-
-                                            {/* BUDGET INPUT: Always enabled */}
-                                            <div className="join">
-                                                <span className="join-item btn btn-sm btn-active pointer-events-none">$</span>
-                                                <input
-                                                    type="number"
-                                                    className="input input-bordered input-sm join-item w-24"
-                                                    value={tempBudget}
-                                                    onChange={(e) => {
-                                                        setTempBudget(e.target.value);
-                                                        if (error) setError(""); // ✨ Clear error during editing
-                                                    }}
-                                                    autoFocus={cat.name.toLowerCase() === 'other'} // Focus budget if name is locked
-                                                />
-                                            </div>
-
-                                            <div className="flex gap-2">
-                                                <button className="btn btn-success btn-sm" onClick={() => handleUpdate(cat.name)}>Save</button>
-                                                <button className="btn btn-ghost btn-sm" onClick={() => setEditingName(null)}>Cancel</button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        /* --- VIEW MODE --- */
-
-                                        <div className="flex flex-col md:flex-row gap-3 items-center justify-between w-full pl-3">
-                                            <div className="flex items-center gap-4 w-full">
-
-
-                                                <div className="flex-1">
-                                                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">
-                                                        {cat.name}
-                                                    </h3>
-                                                    <p className="text-sm font-medium text-slate-400 dark:text-slate-500 ">
-                                                        ${cat.budget.toLocaleString(undefined, { minimumFractionDigits: 2 })} <span className="font-normal">limit</span>
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-2 w-full md:w-auto items-center">
-                                                <button
-                                                    className="btn btn-ghost btn-sm hover:bg-primary/10 hover:text-primary transition-colors font-semibold"
-                                                    onClick={() => {
-                                                        setEditingName(cat.name);
-                                                        setTempName(cat.name);
-                                                        setTempBudget(cat.budget.toString());
-                                                    }}
-                                                >
-                                                    Edit
-                                                </button>
-
-                                                {cat.name.toLowerCase() !== 'other' ? (
-                                                    <button
-                                                        className="btn btn-ghost btn-sm text-slate-400 hover:text-error hover:bg-error/10 transition-colors"
-                                                        onClick={() => handleDelete(cat.name)}
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
-                                                ) : (
-                                                    <span className="badge badge-outline badge-sm opacity-30 uppercase text-[9px] font-bold tracking-widest px-2">System</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))
+                            categoriesForList.map((cat, index) => {
+                                return <CategoryRow 
+                                    key={cat.name}
+                                    cat={cat}
+                                    editScope={editScope}
+                                    handleUpdate={handleUpdate}
+                                    handleDelete={handleDelete}
+                                    setTempName={setTempName}
+                                    setTempBudget={setTempBudget}
+                                    setEditingName={setEditingName}
+                                    editingName={editingName}
+                                    error={error}
+                                    setError={setError}
+                                />
+                            })
                         )}
                     </div>
 

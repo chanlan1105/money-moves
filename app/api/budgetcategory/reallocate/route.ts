@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
             WHERE "user"=${user}
                 AND date >= ${month}::date 
                 AND date < (${month}::date + interval '1 month')
+            ORDER BY date DESC
         ` as any[];
 
         // Fetch valid categories
