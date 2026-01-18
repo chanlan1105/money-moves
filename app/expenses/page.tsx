@@ -19,6 +19,7 @@ export default function Expenses() {
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
+    // Fetch transactions for given month
     useEffect(() => {
         fetch("/api/transactions", {
             method: "POST",
@@ -37,6 +38,7 @@ export default function Expenses() {
         });
     }, [activeMonth, activeYear]);
 
+    // Fetch budget amounts
     useEffect(() => {
         fetch("/api/budgetcategory/fetch", {
             method: "POST",
@@ -44,14 +46,15 @@ export default function Expenses() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                user: "hackathon"
+                user: "hackathon",
+                month: `${activeYear}-${(activeMonth+1).toString().padStart(2, "0")}-01`
             })
         }).then(res => {
             res.json().then(json => {
                 setBudgets(json);
             });
         });
-    });
+    }, [activeMonth, activeYear]);
 
     // Define the interface for your chart data
     interface BudgetCategoryData {
