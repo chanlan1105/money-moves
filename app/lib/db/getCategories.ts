@@ -1,6 +1,6 @@
 import { sql } from "../sql";
 
-export default async function getCategories(user: string, month: string | null) {
+export default async function getCategories(user: string, month?: string) {
     // Add Other to the table if not exists
     await sql`
         INSERT INTO config ("user", category, budget)
