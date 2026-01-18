@@ -1,4 +1,4 @@
-Money Moves
+# Money Moves
 
 > An all-in-one platform for budgeting and managing your expenses with dynamic AI integration and a friendly UI.
 
