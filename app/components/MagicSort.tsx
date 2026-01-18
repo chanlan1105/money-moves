@@ -1,41 +1,44 @@
 "use client";
 
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
-export default function MagicSort({ monthString }: { monthString: string }) {
-  const [loading, setLoading] = useState(false);
+export default function MagicSort({ monthString, setTransactions }: { monthString: string, setTransactions: Dispatch<SetStateAction<any>> }) {
+    const [loading, setLoading] = useState(false);
 
-  const handleSort = async () => {
-    setLoading(true);
-    try {
-      await fetch('/api/budgetcategory/reallocate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          user: "hackathon", 
-          month: monthString + "-01" 
-        }),
-      });
-      alert("AI Re-sort Complete");
-    } catch (err) {
-      alert("Error sorting");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleSort = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/budgetcategory/reallocate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user: "hackathon",
+                    month: monthString + "-01"
+                }),
+            });
+            const json = await res.json();
+            setTransactions(json);
+        } catch (err) {
+            alert("Error sorting");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <button 
-      onClick={handleSort}
-      disabled={loading}
-      className="fixed top-4 left-4 z-50 btn btn-circle btn-primary shadow-lg"
-      title="Re-allocate Budget"
-    >
-      {loading ? (
-        <span className="loading loading-spinner h-5 w-5"></span>
-      ) : (
-        "✨"
-      )}
-    </button>
-  );
+    return (
+        <button
+            onClick={handleSort}
+            disabled={loading}
+            className="fixed top-4 right-4 z-50 btn btn-primary px-8 rounded-full shadow-lg border-none bg-gradient-to-r from-violet-600 to-indigo-600 hover:scale-105 transition-all"
+            title="Re-allocate Categories"
+            
+        >
+            {loading ? (
+                <span className="loading loading-spinner h-5 w-5"></span>
+            ) : (
+                "Re-allocate Categories ✨"
+            )}
+        </button>
+    );
 }

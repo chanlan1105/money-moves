@@ -8,6 +8,7 @@ import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import { TransactionTable } from './TransactionTable';
 import BudgetDoughnut from './BudgetDoughnut';
+import MagicSort from '../components/MagicSort';
 
 export default function Expenses() {
     const [activeSection, setActiveSection] = useState<Section>(Section.EXPENSES);
@@ -16,6 +17,10 @@ export default function Expenses() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [transactions, setTransactions] = useState([]);
     const [budgets, setBudgets] = useState([]);
+
+    const [refreshSignal, setRefreshSignal] = useState(0); 
+
+    
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
@@ -145,8 +150,12 @@ export default function Expenses() {
                     </div>
 
                     <TransactionTable transactions={transactions} />
-                </main>
 
+
+                    <MagicSort monthString={`${activeYear}-${(activeMonth+1).toString().padStart(2, "0")}`} setTransactions={setTransactions}
+                     />
+                </main>
+                         
                 <BottomNav
                     activeSection={activeSection}
                     onSectionSelect={setActiveSection}

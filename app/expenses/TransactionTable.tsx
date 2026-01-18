@@ -24,7 +24,8 @@ export function TransactionTable({ transactions }: { transactions: Transaction[]
                     {transactions.map((transaction, index) => (
                         /* Added dark:hover:bg-slate-800 */
                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
-                            <td className="font-medium">{transaction.date}</td>
+                            <td className="font-medium">{transaction.date.substring(0,10)}</td>
+                            
                             <td>
                                 {/* Added dark:border-gray-500 dark:text-gray-300 */}
                                 <span className="badge badge-outline badge-sm dark:border-gray-500 dark:text-gray-300 text-nowrap">
