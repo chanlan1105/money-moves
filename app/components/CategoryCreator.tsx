@@ -30,15 +30,15 @@ export default function CategoryCreator() {
     const [tempName, setTempName] = useState("");
     const [tempBudget, setTempBudget] = useState("");
 
-    
-    useEffect (() => {
+
+    useEffect(() => {
 
         settotaBudget(
             categories.reduce((sum, cat) => sum + cat.budget, 0)
         );
 
     }, [categories]);
-    
+
 
     const fetchCategories = async () => {
         setIsLoading(true);
@@ -208,7 +208,7 @@ export default function CategoryCreator() {
         setIsLoading(true);
         try {
             const response = await fetch('/api/budgetcategory/delete', {
-                method: 'DELETE', // or DELETE, depending on your teammate's route
+                method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user: "hackathon",
@@ -236,43 +236,70 @@ export default function CategoryCreator() {
 
     return (
         <div className="p-6 w-full max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">Create Budget Categories</h2>
+            <div className="mb-10 text-center">
+                <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+                    Budget Planner
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 mt-2">
+                    Define your monthly limits to stay on track.
+                </p>
+            </div>
 
-            {/* Input Group: Stacked on mobile, joined on desktop */}
-            <div className="flex flex-col md:flex-row gap-2 mb-4">
-                <input
-                    type="text"
-                    placeholder="Category (e.g. Dining)"
-                    className="input input-bordered w-full md:flex-1"
-                    value={catName}
-                    onChange={(e) => {
-                        setCatName(e.target.value);
-                        if (error) setError(""); // Clear error as they type
-                    }}
-                    disabled={isLoading}
-                />
-                <div className="join w-full md:w-auto">
-                    <span className="join-item btn btn-active pointer-events-none">$</span>
-                    <input
-                        type="number"
-                        placeholder="Amount"
-                        className="input input-bordered join-item w-full md:w-32"
-                        value={budgetAmount}
-                        onChange={(e) => {
-                            setBudgetAmount(e.target.value);
-                            if (error) setError(""); // Clear error as they type
-                        }}
-                        disabled={isLoading}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddCategory(e)}
-                    />
-                    <button
-                        className={`btn btn-primary join-item ${isLoading ? 'loading' : ''}`}
-                        onClick={handleAddCategory}
-                        disabled={isLoading}
-                    >
-                        Add
-                    </button>
+            {/* --- CREATION CARD --- */}
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 mb-8 transition-all">
+                <div className="flex flex-col md:flex-row gap-3">
+                    <div className="relative flex-1">
+                        <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            placeholder="Category Name (e.g., Dining)"
+                            className="input input-bordered w-full bg-slate-50 dark:bg-slate-950 focus:ring-2 focus:ring-primary/50 transition-all"
+                            value={catName}
+                            onChange={(e) => {
+                                setCatName(e.target.value);
+                                if (error) setError("");
+                            }}
+                            disabled={isLoading}
+                        />
+                    </div>
+
+                    <div className="join w-full md:w-auto">
+                        <span className="join-item btn btn-active bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 pointer-events-none text-slate-500">
+                            $
+                        </span>
+                        <input
+                            type="number"
+                            placeholder="0.00"
+                            className="input input-bordered join-item w-full md:w-32 bg-slate-50 dark:bg-slate-950 focus:ring-2 focus:ring-primary/50"
+                            value={budgetAmount}
+                            onChange={(e) => {
+                                setBudgetAmount(e.target.value);
+                                if (error) setError("");
+                            }}
+                            disabled={isLoading}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddCategory(e)}
+                        />
+                        <button
+                            className={`btn btn-primary join-item px-6 shadow-lg shadow-primary/20 ${isLoading ? 'loading' : ''}`}
+                            onClick={handleAddCategory}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? '' : 'Add'}
+                        </button>
+                    </div>
                 </div>
+                {error && (
+                    <div className="mt-3 flex items-center gap-2 text-error text-xs font-medium animate-in fade-in slide-in-from-top-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {error}
+                    </div>
+                )}
             </div>
 
             {error && <div className="text-error text-sm mb-4">{error}</div>}
@@ -339,25 +366,44 @@ export default function CategoryCreator() {
                                         </div>
                                     ) : (
                                         /* --- VIEW MODE --- */
-                                        <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold">{cat.name}</h3>
-                                                <p className="text-sm text-base-content/60">
-                                                    ${cat.budget.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button className="btn btn-ghost btn-sm" onClick={() => {
-                                                    setEditingName(cat.name);
-                                                    setTempName(cat.name);
-                                                    setTempBudget(cat.budget.toString());
-                                                }}>Edit</button>
 
-                                                {/* Only show Delete if it's NOT 'other' */}
+                                        <div className="flex flex-col md:flex-row gap-3 items-center justify-between w-full pl-3">
+                                            <div className="flex items-center gap-4 w-full">
+
+
+                                                <div className="flex-1">
+                                                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">
+                                                        {cat.name}
+                                                    </h3>
+                                                    <p className="text-sm font-medium text-slate-400 dark:text-slate-500 ">
+                                                        ${cat.budget.toLocaleString(undefined, { minimumFractionDigits: 2 })} <span className="font-normal">limit</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-2 w-full md:w-auto items-center">
+                                                <button
+                                                    className="btn btn-ghost btn-sm hover:bg-primary/10 hover:text-primary transition-colors font-semibold"
+                                                    onClick={() => {
+                                                        setEditingName(cat.name);
+                                                        setTempName(cat.name);
+                                                        setTempBudget(cat.budget.toString());
+                                                    }}
+                                                >
+                                                    Edit
+                                                </button>
+
                                                 {cat.name.toLowerCase() !== 'other' ? (
-                                                    <button className="btn btn-error btn-sm" onClick={() => handleDelete(cat.name)}>Delete</button>
+                                                    <button
+                                                        className="btn btn-ghost btn-sm text-slate-400 hover:text-error hover:bg-error/10 transition-colors"
+                                                        onClick={() => handleDelete(cat.name)}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
                                                 ) : (
-                                                    <div className="badge badge-ghost text-[10px] opacity-50 uppercase tracking-widest">System</div>
+                                                    <span className="badge badge-outline badge-sm opacity-30 uppercase text-[9px] font-bold tracking-widest px-2">System</span>
                                                 )}
                                             </div>
                                         </div>
@@ -368,26 +414,28 @@ export default function CategoryCreator() {
                     </div>
 
                     {/* --- TOTAL BUDGET SUMMARY --- */}
-      {categories.length > 0 && (
-        <div className="mt-6 p-4 bg-primary/5 border border-primary/10 rounded-xl flex justify-between items-center">
-          <div>
-            <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Monthly Budget</span>
-            <p className="text-xs text-slate-400">Sum of all planned category limits</p>
-          </div>
-          <div className="text-right">
-            <span className="text-2xl font-bold text-primary">
-              ${totalBudget.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-          </div>
-        </div>
-      )}
-                    
+                    {categories.length > 0 && (
+                        <div className="mt-10 p-1 bg-gradient-to-r from-primary/20 via-indigo-500/20 to-purple-500/20 rounded-2xl">
+                            <div className="bg-white dark:bg-slate-900 rounded-[calc(1rem-1px)] p-6 flex justify-between items-center shadow-inner transition-all">
+                                <div>
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Total Allocated</span>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Your total planned spending for this month</p>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">
+                                        ${totalBudget.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>
     );
 
-   
+
 
 }
 

@@ -15,7 +15,7 @@ export default function BottomNav({ activeSection, onSectionSelect }: BottomNavP
     const tabs = [
         { id: Section.EXPENSES, label: 'Expenses', icon: ICONS.Expenses, href: '/expenses' },
         { id: Section.BUDGET, label: 'Budget', icon: ICONS.Budget, href: '/budget' },
-        { id: Section.SETTINGS, label: 'Settings', icon: ICONS.Settings, href: '/settings' },
+        { id: Section.SETTINGS, label: 'Upload', icon: ICONS.Upload, href: '/upload' }
     ];
 
     const pathname = usePathname();
