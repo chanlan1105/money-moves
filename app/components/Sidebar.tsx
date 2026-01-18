@@ -9,7 +9,7 @@ interface SidebarProps {
     setActiveYear: (year: number) => void;
 }
 
-export default function Sidebar({ 
+export default function Sidebar({
     activeMonth, 
     onMonthSelect, 
     isOpen, 

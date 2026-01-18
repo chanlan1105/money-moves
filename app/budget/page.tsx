@@ -14,7 +14,7 @@ export default function Budget() {
     const [activeMonth, setActiveMonth] = useState<number>(new Date().getMonth());
     const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear());
 
-    const [editScope, setEditScope] = useState<'global' | 'monthly'>('monthly');
+    const [editScope, setEditScope] = useState<'global' | 'monthly'>('global');
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
@@ -22,7 +22,10 @@ export default function Budget() {
         /* Main wrapper: Deep dark background */
         <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 relative transition-colors duration-300">
 
-            <Activity mode={editScope == "monthly" ? "visible" : "hidden"}>
+            <div className={
+                `transition-all duration-500 ease-in-out overflow-x-hidden
+                ${editScope == "monthly" ? "w-64" : "w-0"}`
+            }>
                 <Sidebar
                     activeMonth={activeMonth}
                     onMonthSelect={(month) => {
@@ -34,7 +37,7 @@ export default function Budget() {
                     activeYear={activeYear}
                     setActiveYear={setActiveYear}
                 />
-            </Activity>
+            </div>
 
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Mobile Header: Elevated dark surface with subtle border */}
