@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parse } from "csv-parse/sync"; // Sync is easier for hackathon logic
 import { sql } from "@/app/lib/sql";
 import getCategories from "@/app/lib/db/getCategories";
-import categorise from "@/app/lib/db/categorise";
+import generateReclassifications from "@/app/lib/db/generateReclassifications";
 
 interface CsvRow {
     date: string;
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         const categories = (await getCategories(user)).map(c => c.category);
 
         // Select categories for each line item
-        const reclassifications = await categorise(categories, finalData.map((row, index) => ({
+        const reclassifications = await generateReclassifications(categories, finalData.map((row, index) => ({
             detail: row.detail,
             id: index
         })));

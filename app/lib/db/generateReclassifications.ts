@@ -1,7 +1,7 @@
 import { setTimeout } from "timers/promises";
 import { gemini } from "../gemini";
 
-export default async function categorise(
+export default async function generateReclassifications(
     categories: string[],
     entries: { id: number, detail: string }[],
     maxEntries: number = 10

@@ -1,8 +1,10 @@
-import categorise from "@/app/lib/db/categorise";
+import generateReclassifications from "@/app/lib/db/generateReclassifications";
 import getCategories from "@/app/lib/db/getCategories";
+import updateTxCategories from "@/app/lib/db/updateTxCategories";
 import { gemini } from "@/app/lib/gemini";
 import { sql } from "@/app/lib/sql";
 import { NextRequest } from "next/server";
+import postgres from "postgres";
 
 /**
  * DELETE request to api/budgetcategory/delete
@@ -64,20 +66,12 @@ export async function DELETE(req: NextRequest) {
             const validCategoryNames = categoryList.map(c => c.category);
 
             // ✨ 2. AI Brainstorming: Gemini decides where these belong
-            const reclassifications = await categorise(validCategoryNames, orphans);
+            const reclassifications = await generateReclassifications(validCategoryNames, orphans);
             
             // ✨ 3. Batch Update: Use a single transaction for all reassignments
             if (reclassifications.length > 0) {
-                await sql.begin(async (tx) => {
-                    for (const { id, category } of reclassifications) {
-                        // If Gemini couldn't find a match, it might return null/Other
-                        const finalCategory = category || "Other"; 
-                        await tx`
-                            UPDATE transactions 
-                            SET category = ${finalCategory}
-                            WHERE id = ${id} AND "user"=${user}
-                        `;
-                    }
+                await sql.begin(async (tx: any) => {
+                    await updateTxCategories(tx as postgres.Sql<{}>, reclassifications, user);
                 });
             }
         }

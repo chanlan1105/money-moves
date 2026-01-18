@@ -1,7 +1,9 @@
-import categorise from "@/app/lib/db/categorise";
+import generateReclassifications from "@/app/lib/db/generateReclassifications";
 import getCategories from "@/app/lib/db/getCategories";
+import updateTxCategories from "@/app/lib/db/updateTxCategories";
 import { sql } from "@/app/lib/sql";
 import { NextRequest } from "next/server";
+import postgres from "postgres";
 
 export async function POST(req: NextRequest) {
     const { user, month } = await req.json();
@@ -20,20 +22,12 @@ export async function POST(req: NextRequest) {
         const categories = (await getCategories(user)).map(c => c.category);
 
         // Reallocate categories
-        const reclassifications = await categorise(categories, transactions);
+        const reclassifications = await generateReclassifications(categories, transactions);
 
         // Batch update SQL
         if (reclassifications.length > 0) {
             await sql.begin(async (tx: any) => {
-                for (const { id, category } of reclassifications) {
-                    // If Gemini couldn't find a match, it might return null/Other
-                    const finalCategory = category || "Other"; 
-                    await tx`
-                        UPDATE transactions 
-                        SET category = ${finalCategory}
-                        WHERE id = ${id} AND "user"=${user}
-                    `;
-                }
+                await updateTxCategories(tx as postgres.Sql<{}>, reclassifications, user);
             });
         }
 
