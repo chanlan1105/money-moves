@@ -9,6 +9,10 @@ import BottomNav from '../components/BottomNav';
 import { TransactionTable } from './TransactionTable';
 import BudgetDoughnut from './BudgetDoughnut';
 
+import CategoryCreator from "../budget/CategoryCreator"; // Adjusted path
+import CSVUpload from "../components/CSVUpload";           // Adjusted path
+import Dock from "../components/Dock";                     // Adjusted path
+
 export default function Expenses() {
     const [activeSection, setActiveSection] = useState<Section>(Section.EXPENSES);
     const [activeMonth, setActiveMonth] = useState<number>(new Date().getMonth());
