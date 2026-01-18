@@ -4,6 +4,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --chart-track: #c7cbcf;
 }
 
 @theme inline {
@@ -17,6 +18,7 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --chart-track: #303949;
   }
 }
 

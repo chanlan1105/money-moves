@@ -89,7 +89,8 @@ export default function Expenses() {
     });
 
     return (
-        <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative">
+        /* Added dark:bg-slate-950 */
+        <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-hidden relative transition-colors duration-300">
             <Sidebar
                 activeMonth={activeMonth}
                 onMonthSelect={(month) => {
@@ -103,25 +104,29 @@ export default function Expenses() {
             />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200">
+                {/* Mobile Header: Added dark:bg-slate-900 and dark:border-slate-800 */}
+                <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
                     <button
                         onClick={toggleSidebar}
-                        className="p-2 -ml-2 rounded-md text-slate-500 hover:bg-slate-100"
+                        className="p-2 -ml-2 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <div className="flex-1 px-3 text-center text-xl font-semibold text-slate-800">{MONTHS[activeMonth]} {activeYear}</div>
+                    <div className="flex-1 px-3 text-center text-xl font-semibold text-slate-800 dark:text-slate-100">
+                        {MONTHS[activeMonth]} {activeYear}
+                    </div>
                 </header>
 
-                <header className="hidden lg:flex items-center px-8 py-6 bg-white border-b border-slate-200">
-                    <h1 className="text-2xl font-semibold text-slate-800">
+                {/* Desktop Header: Added dark:bg-slate-900 and dark:border-slate-800 */}
+                <header className="hidden lg:flex items-center px-8 py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                    <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
                         {MONTHS[activeMonth]} {activeYear}
                     </h1>
                 </header>
 
-                <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+                <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 p-4 lg:p-8">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
                         {categoryData.map(data => (
                             <BudgetDoughnut key={data.category} data={data} />

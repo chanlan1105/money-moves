@@ -58,8 +58,6 @@ export default function CategoryCreator() {
                     budget: item.budget
                 }));
 
-                console.log(formattedData);
-
                 setCategories(formattedData);
             }
         } catch (err) {
