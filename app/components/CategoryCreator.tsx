@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Category {
     name: string;
@@ -19,12 +19,26 @@ export default function CategoryCreator() {
     const [error, setError] = useState<string>(""); // This was likely outside!
     const [isLoading, setIsLoading] = useState(false);
 
+
+    const [totalBudget, settotaBudget] = useState(0);
+
+
     // Stores the name of the category currently being edited (null if none)
     const [editingName, setEditingName] = useState<string | null>(null);
 
     // Temporary storage for the edits before they are saved
     const [tempName, setTempName] = useState("");
     const [tempBudget, setTempBudget] = useState("");
+
+    
+    useEffect (() => {
+
+        settotaBudget(
+            categories.reduce((sum, cat) => sum + cat.budget, 0)
+        );
+
+    }, [categories]);
+    
 
     const fetchCategories = async () => {
         setIsLoading(true);
@@ -69,6 +83,11 @@ export default function CategoryCreator() {
 
         if (!catName.trim()) {
             setError("Category name cannot be blank.");
+            return;
+        }
+
+        if (catName.length > 29) {
+            setError("Category name cannot be too long.");
             return;
         }
 
@@ -124,6 +143,13 @@ export default function CategoryCreator() {
             setError("Category name cannot be empty.");
             return;
         }
+
+        if (tempName.length > 29) {
+            setError("Category name cannot be too long.");
+            return;
+        }
+
+
 
         // 2. Validate Budget
         if (isNaN(amount) || amount < 0) {
@@ -208,8 +234,10 @@ export default function CategoryCreator() {
         }
     };
 
+
+
     return (
-        <div className="p-6 max-w-2xl bg-base-100 rounded-xl shadow-md">
+        <div className="p-6 w-full max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold mb-6">Create Budget Categories</h2>
 
             {/* Input Group: Stacked on mobile, joined on desktop */}
@@ -281,9 +309,9 @@ export default function CategoryCreator() {
                                                     value={tempName}
                                                     onChange={(e) => {
                                                         setTempName(e.target.value);
-                                                        if (error) setError(""); // ✨ Clear error during editing
+                                                        if (error) setError(""); //  Clear error during editing
                                                     }}
-                                                    disabled={cat.name.toLowerCase() === 'other'} // 🔒 The Lock
+                                                    disabled={cat.name.toLowerCase() === 'other'} //  The Lock
                                                     title={cat.name.toLowerCase() === 'other' ? "System category names cannot be changed" : ""}
                                                 />
                                                 {cat.name.toLowerCase() === 'other' && (
@@ -316,7 +344,9 @@ export default function CategoryCreator() {
                                         <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
                                             <div className="flex-1">
                                                 <h3 className="font-semibold">{cat.name}</h3>
-                                                <p className="text-sm text-base-content/60">${cat.budget.toFixed(2)}</p>
+                                                <p className="text-sm text-base-content/60">
+                                                    ${cat.budget.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </p>
                                             </div>
                                             <div className="flex gap-2">
                                                 <button className="btn btn-ghost btn-sm" onClick={() => {
@@ -338,10 +368,29 @@ export default function CategoryCreator() {
                             ))
                         )}
                     </div>
+
+                    {/* --- TOTAL BUDGET SUMMARY --- */}
+      {categories.length > 0 && (
+        <div className="mt-6 p-4 bg-primary/5 border border-primary/10 rounded-xl flex justify-between items-center">
+          <div>
+            <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Monthly Budget</span>
+            <p className="text-xs text-slate-400">Sum of all planned category limits</p>
+          </div>
+          <div className="text-right">
+            <span className="text-2xl font-bold text-primary">
+              ${totalBudget.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
+        </div>
+      )}
+                    
                 </div>
             </div>
         </div>
     );
+
+   
+
 }
 
 

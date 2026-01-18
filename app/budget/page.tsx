@@ -7,6 +7,7 @@ import { MONTHS } from '../../lib/constants';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import MainContent from '../components/MainContent';
+import CategoryCreator from '../components/CategoryCreator';
 
 export default function Budget() {
   const [activeSection, setActiveSection] = useState<Section>(Section.EXPENSES);
@@ -16,7 +17,7 @@ export default function Budget() {
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative">
+    <div className="flex h-screen w-full bg-slate-50 overflow-scroll relative">
     
       <div className="flex-1 flex flex-col min-w-0">
         <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200">
@@ -31,10 +32,9 @@ export default function Budget() {
           <div className="w-10"></div>
         </header>
 
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
-          Budget
-        </main>
-
+      <div className='flex-1 overflow-y-auto pb-24'>
+        <CategoryCreator />
+      </div>
         <BottomNav 
           activeSection={activeSection} 
           onSectionSelect={setActiveSection} 
