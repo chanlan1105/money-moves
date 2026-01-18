@@ -5,7 +5,7 @@
 ---
 
 ## About the Project
-Having many sources of payment today is common practice. This makes having a clear portrait of your budget much more difficult as your expenditures are separated across different platforms. [Insert project title here] is a website that addresses this problem.
+Having many sources of payment today is common practice. This makes having a clear portrait of your budget much more difficult as your expenditures are separated across different platforms. Money Moves is a website that addresses this problem.
 
 ### Built With
 * Next.js
