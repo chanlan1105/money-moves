@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Section } from '../../types';
-import { ICONS } from '../../constants';
+import { Section } from '../../lib/types';
+import { ICONS } from '../../lib/constants';
 import { usePathname } from 'next/navigation';
 
 interface BottomNavProps {

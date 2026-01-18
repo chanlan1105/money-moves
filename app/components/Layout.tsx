@@ -2,8 +2,8 @@
 
 
 import React, { useState } from 'react';
-import { Section, Month } from '../../types';
-import { MONTHS } from '../../constants';
+import { Section, Month } from '../../lib/types';
+import { MONTHS } from '../../lib/constants';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import MainContent from './MainContent';

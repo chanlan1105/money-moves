@@ -26,3 +26,5 @@ export const ICONS = {
     </svg>
   )
 };
+
+export const YEAR = 2026;
