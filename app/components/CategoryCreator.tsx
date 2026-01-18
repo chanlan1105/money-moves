@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function CategoryCreator() {
   const [catName, setCatName] = useState("");
@@ -12,6 +12,39 @@ export default function CategoryCreator() {
   ]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/budgetcategory/get', { // Assuming a 'get' or 'list' route exists
+        method: 'POST', // Your backend specified POST for this
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: "hackathon" }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // The backend returns [{category, budget}, ...]
+        // We map it to our state format {name, budget}
+        const formattedData = data.map((item: { category: string; budget: number }) => ({
+          name: item.category,
+          budget: item.budget
+        }));
+        setCategories(formattedData);
+      }
+    } catch (err) {
+      console.error("Failed to load categories:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  // --- NEW: LIFECYCLE HOOK ---
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
 
 interface Category {
     name: string;
