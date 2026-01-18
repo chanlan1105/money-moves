@@ -7,12 +7,15 @@ import { MONTHS, YEAR } from '../../lib/constants';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import { TransactionTable } from './TransactionTable';
+import BudgetDoughnut from './BudgetDoughnut';
 
 export default function Expenses() {
     const [activeSection, setActiveSection] = useState<Section>(Section.EXPENSES);
     const [activeMonth, setActiveMonth] = useState<number>(new Date().getMonth());
+    const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear());
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [transactions, setTransactions] = useState([]);
+    const [budgets, setBudgets] = useState([]);
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
@@ -24,14 +27,66 @@ export default function Expenses() {
             },
             body: JSON.stringify({
                 user: "hackathon",
-                month: `${YEAR}-${(activeMonth+1).toString().padStart(2, "0")}`
+                year: `${activeYear}`,
+                month: `${(activeMonth+1).toString().padStart(2, "0")}`
             })
         }).then(res => {
             res.json().then(json => {
                 setTransactions(json);
             })
         });
-    }, [activeMonth]);
+    }, [activeMonth, activeYear]);
+
+    useEffect(() => {
+        fetch("/api/budgetcategory/fetch", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user: "hackathon"
+            })
+        }).then(res => {
+            res.json().then(json => {
+                setBudgets(json);
+            });
+        });
+    });
+
+    // Define the interface for your chart data
+    interface BudgetCategoryData {
+        category: string;
+        budget: number;
+        actual: number;
+        color: string;
+        remaining: number;
+    }
+
+    // Derive categoryData from transactions and budgets
+    const categoryData: BudgetCategoryData[] = budgets.map((b: any) => {
+        // Sum transactions for this specific category
+        const actual = transactions
+            .filter((t: any) => t.category === b.category)
+            .reduce((sum, t: any) => sum + parseFloat(t.amount), 0);
+
+        const isOver = actual > b.budget;
+
+        return {
+            category: b.category,
+            budget: b.budget,
+            actual: actual,
+            color: isOver ? '#ef4444' : '#22c55e',
+            remaining: Math.max(0, b.budget - actual)
+        };
+    })
+    .sort((a, b) => {
+        // Calculate percentages (actual / budget)
+        const pctA = a.actual / a.budget;
+        const pctB = b.actual / b.budget;
+        
+        // Sort descending: highest percentage first
+        return pctB - pctA;
+    });
 
     return (
         <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative">
@@ -43,6 +98,8 @@ export default function Expenses() {
                 }}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                activeYear={activeYear}
+                setActiveYear={setActiveYear}
             />
 
             <div className="flex-1 flex flex-col min-w-0">
@@ -55,10 +112,22 @@ export default function Expenses() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <div className="w-10"></div>
+                    <div className="flex-1 px-3 text-center text-xl font-semibold text-slate-800">{MONTHS[activeMonth]} {activeYear}</div>
+                </header>
+
+                <header className="hidden lg:flex items-center px-8 py-6 bg-white border-b border-slate-200">
+                    <h1 className="text-2xl font-semibold text-slate-800">
+                        {MONTHS[activeMonth]} {activeYear}
+                    </h1>
                 </header>
 
                 <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                        {categoryData.map(data => (
+                            <BudgetDoughnut key={data.category} data={data} />
+                        ))}
+                    </div>
+
                     <TransactionTable transactions={transactions} />
                 </main>
 

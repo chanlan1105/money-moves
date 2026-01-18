@@ -1,6 +1,3 @@
-
-import React from 'react';
-import { Month } from '../../lib/types';
 import { MONTHS } from '../../lib/constants';
 
 interface SidebarProps {
@@ -8,9 +5,23 @@ interface SidebarProps {
     onMonthSelect: (month: number) => void;
     isOpen: boolean;
     onClose: () => void;
+    // New Props
+    activeYear: number;
+    setActiveYear: (year: number) => void;
 }
 
-export default function Sidebar({ activeMonth, onMonthSelect, isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ 
+    activeMonth, 
+    onMonthSelect, 
+    isOpen, 
+    onClose,
+    activeYear,
+    setActiveYear 
+}: SidebarProps) {
+    
+    // Generate a small range of years for the dropdown (e.g., 2024 to 2026)
+    const years = [2024, 2025, 2026];
+
     return (
         <>
             {isOpen && (
@@ -25,10 +36,40 @@ export default function Sidebar({ activeMonth, onMonthSelect, isOpen, onClose }:
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <div className="h-full flex flex-col">
-                    <div className="p-6 border-b border-slate-100">
+                    <div className="p-6 border-b border-slate-100 space-y-4">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">
                             Navigation
                         </h2>
+
+                        {/* DaisyUI Year Dropdown */}
+                        <div className="dropdown w-full">
+                            <div 
+                                tabIndex={0} 
+                                role="button" 
+                                className="btn btn-sm btn-outline w-full justify-between border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                            >
+                                Year: {activeYear}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                            </div>
+                            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full border border-slate-100 mt-1">
+                                {years.map((year) => (
+                                    <li key={year}>
+                                        <button 
+                                            className={activeYear === year ? "active" : ""}
+                                            onClick={() => {
+                                                setActiveYear(year);
+                                                // Close dropdown by removing focus from the active element
+                                                if (document.activeElement instanceof HTMLElement) {
+                                                    document.activeElement.blur();
+                                                }
+                                            }}
+                                        >
+                                            {year}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
 
                     <nav className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -38,7 +79,7 @@ export default function Sidebar({ activeMonth, onMonthSelect, isOpen, onClose }:
                                 onClick={() => onMonthSelect(index)}
                                 className={`
                                     w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                                    ${MONTHS[activeMonth] === month
+                                    ${activeMonth === index
                                         ? 'bg-slate-100 text-slate-900 shadow-sm border border-slate-200'
                                         : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}
                                 `}

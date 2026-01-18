@@ -27,7 +27,7 @@ export function TransactionTable({ transactions }: { transactions: Transaction[]
                             <td className="font-medium">{transaction.date}</td>
                             <td>
                                 {/* Added dark:border-gray-500 dark:text-gray-300 */}
-                                <span className="badge badge-outline badge-sm dark:border-gray-500 dark:text-gray-300">
+                                <span className="badge badge-outline badge-sm dark:border-gray-500 dark:text-gray-300 text-nowrap">
                                     {transaction.category}
                                 </span>
                             </td>
