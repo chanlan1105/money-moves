@@ -64,9 +64,22 @@ export default function CategoryCreator() {
 
     const handleAddCategory = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (!catName.trim() || !budgetAmount) return;
 
         setError("");
+
+        if (!catName.trim()) {
+            setError("Category name cannot be blank.");
+            return;
+        }
+
+        // 2. Check for negative or zero budget
+        const amount = parseFloat(budgetAmount);
+        if (isNaN(amount) || amount <= 0) {
+            setError("Budget must be a positive number.");
+            return;
+        }
+
+        setError(""); // Clear errors if validation passes
         setIsLoading(true);
 
         try {
@@ -104,7 +117,26 @@ export default function CategoryCreator() {
 
 
     const handleUpdate = async (oldCategoryName: string) => {
-        if (!tempName.trim() || !tempBudget) return;
+        const amount = parseFloat(tempBudget);
+        setError("");
+        // 1. Validate Name (unless it's 'Other')
+        if (!tempName.trim()) {
+            setError("Category name cannot be empty.");
+            return;
+        }
+
+        // 2. Validate Budget
+        if (isNaN(amount) || amount < 0) {
+            setError("Budget cannot be negative.");
+            return;
+        }
+
+        // THE SAFEGUARD: 
+        // If we are updating 'Other', the newCategory name MUST remain 'Other'.
+        // Otherwise, use the tempName the user typed.
+        const finalName = oldCategoryName.toLowerCase() === 'other'
+            ? oldCategoryName
+            : tempName.trim();
 
         setIsLoading(true);
         try {
@@ -114,19 +146,19 @@ export default function CategoryCreator() {
                 body: JSON.stringify({
                     user: "hackathon",
                     oldCategory: oldCategoryName,
-                    newCategory: tempName.trim(),
+                    newCategory: finalName, // We use the protected name here!
                     newBudget: parseFloat(tempBudget)
                 }),
             });
 
             if (response.ok) {
-                // Update the local list so the UI reflects the change immediately
+                // Update local state with the same safe name
                 setCategories(prev => prev.map(cat =>
                     cat.name === oldCategoryName
-                        ? { name: tempName.trim(), budget: parseFloat(tempBudget) }
+                        ? { name: finalName, budget: parseFloat(tempBudget) }
                         : cat
                 ));
-                setEditingName(null); // Exit edit mode
+                setEditingName(null);
             } else {
                 setError("Failed to update category.");
             }
@@ -187,7 +219,10 @@ export default function CategoryCreator() {
                     placeholder="Category (e.g. Dining)"
                     className="input input-bordered w-full md:flex-1"
                     value={catName}
-                    onChange={(e) => setCatName(e.target.value)}
+                    onChange={(e) => {
+                        setCatName(e.target.value);
+                        if (error) setError(""); // Clear error as they type
+                    }}
                     disabled={isLoading}
                 />
                 <div className="join w-full md:w-auto">
@@ -197,7 +232,10 @@ export default function CategoryCreator() {
                         placeholder="Amount"
                         className="input input-bordered join-item w-full md:w-32"
                         value={budgetAmount}
-                        onChange={(e) => setBudgetAmount(e.target.value)}
+                        onChange={(e) => {
+                            setBudgetAmount(e.target.value);
+                            if (error) setError(""); // Clear error as they type
+                        }}
                         disabled={isLoading}
                         onKeyDown={(e) => e.key === 'Enter' && handleAddCategory(e)}
                     />
@@ -233,62 +271,65 @@ export default function CategoryCreator() {
                                 <div key={index} className="p-4 bg-base-200 rounded-lg group hover:bg-base-300 transition-all mb-3">
                                     {/* CHECK: Are we currently editing this specific category? */}
                                     {editingName === cat.name ? (
-                                        /* --- 1. EDIT MODE: Show Input Fields --- */
+                                        /* --- EDIT MODE --- */
                                         <div className="flex flex-col md:flex-row gap-3 items-center">
-                                            <input
-                                                className="input input-bordered input-sm flex-1"
-                                                value={tempName}
-                                                onChange={(e) => setTempName(e.target.value)}
-                                                autoFocus
-                                            />
+
+                                            {/* NAME INPUT: Disabled if it's 'Other' */}
+                                            <div className="flex-1 w-full">
+                                                <input
+                                                    className={`input input-bordered input-sm w-full ${cat.name.toLowerCase() === 'other' ? 'bg-base-300 cursor-not-allowed opacity-70' : ''}`}
+                                                    value={tempName}
+                                                    onChange={(e) => {
+                                                        setTempName(e.target.value);
+                                                        if (error) setError(""); // ✨ Clear error during editing
+                                                    }}
+                                                    disabled={cat.name.toLowerCase() === 'other'} // 🔒 The Lock
+                                                    title={cat.name.toLowerCase() === 'other' ? "System category names cannot be changed" : ""}
+                                                />
+                                                {cat.name.toLowerCase() === 'other' && (
+                                                    <span className="text-[10px] text-info ml-1 italic">Name is system-reserved</span>
+                                                )}
+                                            </div>
+
+                                            {/* BUDGET INPUT: Always enabled */}
                                             <div className="join">
                                                 <span className="join-item btn btn-sm btn-active pointer-events-none">$</span>
                                                 <input
                                                     type="number"
                                                     className="input input-bordered input-sm join-item w-24"
                                                     value={tempBudget}
-                                                    onChange={(e) => setTempBudget(e.target.value)}
+                                                    onChange={(e) => {
+                                                        setTempBudget(e.target.value);
+                                                        if (error) setError(""); // ✨ Clear error during editing
+                                                    }}
+                                                    autoFocus={cat.name.toLowerCase() === 'other'} // Focus budget if name is locked
                                                 />
                                             </div>
+
                                             <div className="flex gap-2">
                                                 <button className="btn btn-success btn-sm" onClick={() => handleUpdate(cat.name)}>Save</button>
                                                 <button className="btn btn-ghost btn-sm" onClick={() => setEditingName(null)}>Cancel</button>
                                             </div>
                                         </div>
                                     ) : (
-                                        /* --- 2. VIEW MODE: Show Normal Text (Your Original Code + Edit Button) --- */
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <span className="font-bold text-lg">{cat?.name || "Unnamed Category"}</span>
-                                                <div className="text-xs opacity-50">Limit: ${cat?.budget || 0}</div>
+                                        /* --- VIEW MODE --- */
+                                        <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold">{cat.name}</h3>
+                                                <p className="text-sm text-base-content/60">${cat.budget.toFixed(2)}</p>
                                             </div>
+                                            <div className="flex gap-2">
+                                                <button className="btn btn-ghost btn-sm" onClick={() => {
+                                                    setEditingName(cat.name);
+                                                    setTempName(cat.name);
+                                                    setTempBudget(cat.budget.toString());
+                                                }}>Edit</button>
 
-                                            <div className="flex items-center gap-2">
-                                                {/* Edit Button: Visible on hover */}
-                                                <button
-                                                    className="btn btn-ghost btn-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={() => {
-                                                        setEditingName(cat.name);
-                                                        setTempName(cat.name);
-                                                        setTempBudget(cat.budget.toString());
-                                                    }}
-                                                >
-                                                    Edit
-                                                </button>
-
-                                                {/* Delete Logic: Only show if it's NOT 'Other' */}
-                                                {(cat?.name?.toLowerCase() !== 'other') ? (
-                                                    <button
-                                                        className="btn btn-ghost btn-sm text-error opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        onClick={() => handleDelete(cat.name)}
-                                                        disabled={isLoading}
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
+                                                {/* Only show Delete if it's NOT 'other' */}
+                                                {cat.name.toLowerCase() !== 'other' ? (
+                                                    <button className="btn btn-error btn-sm" onClick={() => handleDelete(cat.name)}>Delete</button>
                                                 ) : (
-                                                    <div className="badge badge-ghost text-xs">System</div>
+                                                    <div className="badge badge-ghost text-[10px] opacity-50 uppercase tracking-widest">System</div>
                                                 )}
                                             </div>
                                         </div>
