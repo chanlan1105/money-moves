@@ -13,7 +13,8 @@ export default async function getCategories(user: string, month: string | null) 
         await sql`
             SELECT 
                 c.category, 
-                COALESCE(o.budget, c.budget) as budget
+                COALESCE(o.budget, c.budget) as budget,
+                (o.category IS NOT NULL) as is_override
             FROM config c
             LEFT JOIN budget_overrides o ON 
                 c.category = o.category AND 

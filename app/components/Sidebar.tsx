@@ -5,7 +5,6 @@ interface SidebarProps {
     onMonthSelect: (month: number) => void;
     isOpen: boolean;
     onClose: () => void;
-    // New Props
     activeYear: number;
     setActiveYear: (year: number) => void;
 }

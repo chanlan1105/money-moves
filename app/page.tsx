@@ -1,5 +1,5 @@
 
-import CategoryCreator from "./components/CategoryCreator";
+import CategoryCreator from "./budget/CategoryCreator";
 import CSVUpload from "./components/CSVUpload";
 
 import Dock from "./components/Dock"; 
