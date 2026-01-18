@@ -1,9 +1,6 @@
-import Banner from "./components/Banner";
+import React from 'react';
+import Layout from './components/Layout';
 
-export default function Home() {
-    return (
-        <>
-            <Banner />
-        </>
-    );
+export default function App() {
+  return <Layout />;
 }
